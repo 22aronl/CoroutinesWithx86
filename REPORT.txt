@@ -1,0 +1,18 @@
+- Is there a reliable way of freeing the memory associated with c-routine?
+  explain how you did it
+
+- Is there a reliable way of freeing the memory associated with a channel?
+  explain how you did it
+
+- Read about the following programming abstractions and explain how they
+  relate to the current assignment:
+
+       * Continuations
+       * Closures
+       * Threads
+       * Co-routines
+       * Green threads
+       * Fibers
+       * non-local goto
+       * Python async/await
+       * C++20 coroutines
