@@ -80,7 +80,7 @@ extern void save_rip(Routine *r, Routine *to);
 
 void save_rsp(Routine *r)
 {
-    __asm__ volatile("movq %%rsp, %0"
+    __asm__ volatile("movq %rsp, %0"
                      : "=r"(r));
 }
 
@@ -89,7 +89,7 @@ void switch_to(Routine *from, Routine *to)
     if (to == 0)
     {
         __asm__ volatile(
-            "movq $60, %%rax"
+            "movq $60, %rax\n"
             "syscall"); // This feels very wrong
     }
     else
@@ -122,7 +122,7 @@ Routine **_current()
 Channel *go(Func func)
 {
     Routine *r = malloc(sizeof(Routine));
-    r->saved_rsp = r->stack + STACK_ENTRIES; // TODO: My ordering may be wrong or somethign
+    r->saved_rsp = (uint64_t)r->stack + STACK_ENTRIES; // TODO: My ordering may be wrong or somethign
     r->ch = *channel();
     r->func = func;
     r->is_started = false;
@@ -154,7 +154,7 @@ Value receive(Channel *ch)
 {
     if (ch->q->head == 0 || ch->receiving)
     {
-        addQ(&ch->q, *current());
+        addQ(ch->q, *current());
         Routine *old_r = *current();
         *current() = removeQ(&ready);
         switch_to(old_r, *current());
@@ -162,7 +162,7 @@ Value receive(Channel *ch)
     }
     else
     {
-        Routine *r = removeQ(&ch->q);
+        Routine *r = removeQ(ch->q);
         addQ(&ready, r);
         return r->send_value;
     }
