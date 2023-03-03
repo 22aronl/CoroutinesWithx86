@@ -1,3 +1,5 @@
+.text
+.global save_rip
 
 save_rip:
     movq %rsp, (%rdi)

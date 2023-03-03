@@ -37,6 +37,7 @@ struct Routine
     Channel ch;
     Func func;
     bool is_started;
+    bool is_empty;
     Value send_value;
 };
 
@@ -86,11 +87,9 @@ void save_rsp(Routine *r)
 
 void switch_to(Routine *from, Routine *to)
 {
-    if (to == 0)
+    if (!to->is_empty)
     {
-        __asm__ volatile(
-            "movq $60, %rax\n"
-            "syscall"); // This feels very wrong
+	exit(0);
     }
     else
     {
@@ -126,6 +125,7 @@ Channel *go(Func func)
     r->ch = *channel();
     r->func = func;
     r->is_started = false;
+    r->is_empty = true;
     addQ(&ready, r);
     return &r->ch;
 }
