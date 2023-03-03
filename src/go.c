@@ -80,7 +80,7 @@ extern void save_rip(Routine *r, Routine *to);
 
 void save_rsp(Routine *r)
 {
-    __asm__ volatile("movq %rsp, %0"
+    __asm__ volatile("movq %%rsp, %0"
                      : "=r"(r));
 }
 
