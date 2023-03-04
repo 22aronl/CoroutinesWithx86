@@ -188,7 +188,7 @@ void send(Channel *ch, Value v)
 {
     if (ch->q->head == 0 || !ch->receiving)
     {
-        addQ(&ready, *current());
+        addQ(ch->q, *current());
         ch->receiving = false;
         switch_from(*current());
     }
