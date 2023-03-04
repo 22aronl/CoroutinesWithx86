@@ -76,6 +76,28 @@ static Routine *removeQ(Queue *q)
 static Routine *current_ = 0;
 static Queue ready = {0, 0};
 
+
+void delete_this_function_when_you_are_done()
+{
+    addQ(&ready, 0);
+    (void)removeQ(&ready);
+}
+
+Routine **current()
+{
+    if (current_ == 0)
+    {
+        current_ = (Routine *)calloc(sizeof(Routine), 1);
+    }
+    return &current_;
+}
+
+/* OSX prepends _ in front of external symbols */
+Routine **_current()
+{
+    return current();
+}
+
 extern void save_rip(Routine *r, Routine *to);
 
 void save_rsp(Routine *r)
@@ -101,27 +123,6 @@ void switch_from(Routine *from)
         *current() = to;
         switch_to(from, to);
     }
-}
-
-void delete_this_function_when_you_are_done()
-{
-    addQ(&ready, 0);
-    (void)removeQ(&ready);
-}
-
-Routine **current()
-{
-    if (current_ == 0)
-    {
-        current_ = (Routine *)calloc(sizeof(Routine), 1);
-    }
-    return &current_;
-}
-
-/* OSX prepends _ in front of external symbols */
-Routine **_current()
-{
-    return current();
 }
 
 Channel *go(Func func)
