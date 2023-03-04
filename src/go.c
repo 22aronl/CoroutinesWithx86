@@ -76,7 +76,6 @@ static Routine *removeQ(Queue *q)
 static Routine *current_ = 0;
 static Queue ready = {0, 0};
 
-
 void delete_this_function_when_you_are_done()
 {
     addQ(&ready, 0);
@@ -121,7 +120,18 @@ void switch_from(Routine *from)
     else
     {
         *current() = to;
-        switch_to(from, to);
+        if (!to->is_started)
+        {
+            to->is_started = false;
+            __asm__ ("movq %0, %%rsp"
+                     :
+                     : "r"(to->saved_rsp));
+            to->func();
+        }
+        else
+        {
+            switch_to(from, to);
+        }
     }
 }
 
@@ -131,7 +141,7 @@ Channel *go(Func func)
     r->saved_rsp = (uint64_t)r->stack + STACK_ENTRIES; // TODO: My ordering may be wrong or somethign
     r->ch = *channel();
     r->func = func;
-    r->is_started = false;
+    r->is_started = true;
     r->is_empty = true;
     addQ(&ready, r);
     return &r->ch;
@@ -162,7 +172,7 @@ Value receive(Channel *ch)
     if (ch->q->head == 0 || ch->receiving)
     {
         addQ(ch->q, *current());
-        ch->receiving = true;  
+        ch->receiving = true;
         switch_from(*current());
         return (*current())->send_value;
     }
@@ -176,7 +186,7 @@ Value receive(Channel *ch)
 
 void send(Channel *ch, Value v)
 {
-    if(ch->q->head == 0 || !ch->receiving)
+    if (ch->q->head == 0 || !ch->receiving)
     {
         addQ(&ready, *current());
         ch->receiving = false;
