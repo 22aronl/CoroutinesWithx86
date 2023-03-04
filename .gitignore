@@ -6,3 +6,5 @@
 *.result
 *.out
 *.time
+
+.vscode/

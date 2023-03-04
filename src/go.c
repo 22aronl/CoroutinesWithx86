@@ -23,7 +23,6 @@ typedef struct Queue
 
 struct Channel
 {
-    Value value;
     Queue *q;
     bool receiving;
 };
@@ -87,13 +86,20 @@ void save_rsp(Routine *r)
 
 void switch_to(Routine *from, Routine *to)
 {
-    if (!to->is_empty)
+    save_rip(from, to);
+}
+
+void switch_from(Routine *from)
+{
+    Routine *to = removeQ(&ready);
+    if (to == 0)
     {
-	exit(0);
+        exit(0);
     }
     else
     {
-        save_rip(from, to);
+        *current() = to;
+        switch_to(from, to);
     }
 }
 
@@ -155,10 +161,9 @@ Value receive(Channel *ch)
     if (ch->q->head == 0 || ch->receiving)
     {
         addQ(ch->q, *current());
-        Routine *old_r = *current();
-        *current() = removeQ(&ready);
-        switch_to(old_r, *current());
-        return ch->value;
+        ch->receiving = true;  
+        switch_from(*current());
+        return (*current())->send_value;
     }
     else
     {
@@ -170,5 +175,16 @@ Value receive(Channel *ch)
 
 void send(Channel *ch, Value v)
 {
-    MISSING();
+    if(ch->q->head == 0 || !ch->receiving)
+    {
+        addQ(&ready, *current());
+        ch->receiving = false;
+        switch_from(*current());
+    }
+    else
+    {
+        Routine *r = removeQ(ch->q);
+        r->send_value = v;
+        addQ(&ready, r);
+    }
 }
