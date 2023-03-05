@@ -98,6 +98,7 @@ Routine **_current()
 }
 
 extern void save_rip(Routine *r, uint64_t rsp);
+extern void new_function(Routine *from, Routine *to, Func func);
 
 void save_rsp(Routine *r)
 {
@@ -110,16 +111,16 @@ void switch_to(Routine *from, Routine *to)
     save_rip(from, to->saved_rsp);
 }
 
-void new_function(Routine* from, Routine* to)
-{
-    __asm__ volatile("movq %%rsp, %0"
-		    : "=r"(from->saved_rsp));
-    //a wall
-    __asm__ volatile("movq %0, %%rsp"
-		    :
-		    : "r"(to->saved_rsp));
-    to->func();
-}
+// void new_function(Routine* from, Routine* to)
+// {
+//     __asm__ volatile("movq %%rsp, %0"
+// 		    : "=r"(from->saved_rsp));
+//     //a wall
+//     __asm__ volatile("movq %0, %%rsp"
+// 		    :
+// 		    : "r"(to->saved_rsp));
+//     to->func();
+// }
 
 void switch_from(Routine *from)
 {
@@ -134,7 +135,7 @@ void switch_from(Routine *from)
         if (to->is_started)
         {
             to->is_started = false;
-	    new_function(from, to);
+            new_function(from, to, to->func);
         }
         else
         {
