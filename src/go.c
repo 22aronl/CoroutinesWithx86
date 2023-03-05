@@ -142,6 +142,13 @@ void switch_from(Routine *from)
             switch_to(from, to);
         }
     }
+    //Testing
+    printf("T");
+}
+
+void next_ready_function()
+{
+    switch_from(*current());
 }
 
 Channel *go(Func func)
@@ -176,13 +183,16 @@ Channel *channel()
     return ch;
 }
 
+extern save_rip_early(Routine* r);
+
 Value receive(Channel *ch)
 {
     if (ch->q->head == 0 || ch->receiving)
     {
         addQ(ch->q, *current());
         ch->receiving = true;
-        switch_from(*current());
+        save_rip_early(*current());
+	//switch_from(*current());
         return (*current())->send_value;
     }
     else
@@ -199,7 +209,8 @@ void send(Channel *ch, Value v)
     {
         addQ(ch->q, *current());
         ch->receiving = false;
-        switch_from(*current());
+	save_rip_early(*current());
+        //switch_from(*current());
     }
     else
     {
