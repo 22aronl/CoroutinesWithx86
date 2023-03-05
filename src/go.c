@@ -181,8 +181,7 @@ Value receive(Channel *ch)
     {
         addQ(ch->q, *current());
         ch->receiving = true;
-        save_rip_early(*current());
-        // switch_from(*current());
+        switch_from(*current());
         return (*current())->send_value;
     }
     else
@@ -199,8 +198,7 @@ void send(Channel *ch, Value v)
     {
         addQ(ch->q, *current());
         ch->receiving = false;
-        save_rip_early(*current());
-        // switch_from(*current());
+        switch_from(*current());
     }
     else
     {
