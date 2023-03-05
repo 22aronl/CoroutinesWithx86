@@ -11,10 +11,7 @@ save_rip:
 new_function:
     movq %rsp, (%rdi)
     movq (%rsi), %rsp
-    call *%rdx
-    call next_ready_function #stack alightment TODO:  
+    pushq *next_ready_function
+    call *%rdx 
     retq
 
-jmp_function_loc:
-    movq %rdi, (%rip)
-    retq
