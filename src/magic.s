@@ -4,14 +4,31 @@
 .extern next_ready_function
 
 save_rip:
+    pushq %rbx
+    pushq %rbp
+    pushq %r12
+    pushq %r13
+    pushq %r14
+    pushq %r15
     movq %rsp, (%rdi)
     movq %rsi, %rsp
+    popq %r15
+    popq %r14
+    popq %r13
+    popq %r12
+    popq %rbp
+    popq %rbx
     retq
 
 new_function:
+    pushq %rbx
+    pushq %rbp
+    pushq %r12
+    pushq %r13
+    pushq %r14
+    pushq %r15
     movq %rsp, (%rdi)
-    movq (%rsi), %rsp
-    pushq *next_ready_function
+    movq %rsi, %rsp
     call *%rdx 
     retq
 

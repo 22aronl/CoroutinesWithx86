@@ -2,12 +2,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-static void missing(const char *file, int line)
-{
-    printf("*** missing code at %s:%d\n", file, line);
-    exit(-1);
-}
-
 #define MISSING() missing(__FILE__, __LINE__)
 
 struct Routine;
@@ -98,7 +92,7 @@ Routine **_current()
 }
 
 extern void save_rip(Routine *r, uint64_t rsp);
-extern void new_function(Routine *from, Routine *to, Func func);
+extern void new_function(Routine *from, uint64_t to, Func func);
 extern void save_rip_early(Routine *r);
 
 void save_rsp(Routine *r)
@@ -125,7 +119,8 @@ void switch_from(Routine *from)
         if (to->is_started)
         {
             to->is_started = false;
-            new_function(from, to, to->func);
+	    to->saved_rsp = (uint64_t)to->stack + STACK_ENTRIES*sizeof(uint64_t)-8;
+            new_function(from, to->saved_rsp, to->func);
         }
         else
         {
@@ -133,7 +128,6 @@ void switch_from(Routine *from)
         }
     }
     // Testing
-    printf("T");
 }
 
 void next_ready_function()
@@ -144,7 +138,8 @@ void next_ready_function()
 Channel *go(Func func)
 {
     Routine *r = malloc(sizeof(Routine));
-    r->saved_rsp = (uint64_t)r->stack + STACK_ENTRIES; // TODO: My ordering may be wrong or somethign
+    r->stack[STACK_ENTRIES-1]=(uint64_t)(&next_ready_function);
+    r->saved_rsp = (uint64_t)r->stack + STACK_ENTRIES*sizeof(uint64_t)-8; // TODO: My ordering may be wrong or somethign
     r->ch = *channel();
     r->func = func;
     r->is_started = true;
@@ -160,7 +155,10 @@ Channel *me()
 
 void again()
 {
-    MISSING();
+    (*current())->is_started = true;
+    (*current())->saved_rsp = (uint64_t)(*current())->stack + STACK_ENTRIES*sizeof(uint64_t)-8;
+    addQ(&ready, *current());
+    next_ready_function();
 }
 
 Channel *channel()
@@ -172,6 +170,12 @@ Channel *channel()
     ch->receiving = false;
     return ch;
 }
+
+__attribute__((constructor)) void init()
+{
+    (*current())->ch = *channel();
+}
+
 
 
 
@@ -196,6 +200,7 @@ void send(Channel *ch, Value v)
 {
     if (ch->q->head == 0 || !ch->receiving)
     {
+	(*current())->send_value = v;
         addQ(ch->q, *current());
         ch->receiving = false;
         switch_from(*current());

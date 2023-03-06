@@ -3,19 +3,25 @@
 
 #include "src/go.h"
 
-Value echo()
-{
-    send(me(),asLong(1));
-    return asLong(3);
+int counter = 0;
+
+Value h() {
+    send(me(), asInt(counter));
+    if(counter < 2) {
+	counter ++;
+	again();
+    }
+    return asInt(666);
 }
 
-int main()
-{
-    Channel* ch = go(echo);
-    printf("one");
-    printf("%ld\n", receive(ch).asLong);
-    printf("finish");
+int main() {
+    Channel* child = go(h);
 
+    int c = receive(child).asInt;
+    int d = receive(child).asInt;
+    int e = receive(child).asInt;
+    printf("%d%d%d\n", c, d, e);
     return 0;
-}
+    
 
+}
