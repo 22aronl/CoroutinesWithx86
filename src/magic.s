@@ -2,6 +2,8 @@
 .global save_rip
 .global new_function
 .extern next_ready_function
+.extern me
+.extern send
 
 save_rip:
     pushq %rbx
@@ -29,6 +31,14 @@ new_function:
     pushq %r15
     movq %rsp, (%rdi)
     movq %rsi, %rsp
-    call *%rdx 
+    call *%rdx
+    pushq %rax
+    infi:
+	call me
+	movq %rax, %rdi
+	popq %rsi
+	pushq %rsi
+	call send
+	jmp infi 
     retq
 

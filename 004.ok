@@ -1,0 +1,47 @@
+starting test0
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+starting test1
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+starting test2
+receive_then_print 0
+receive_then_print 1
+back to call_function
+back to test2
