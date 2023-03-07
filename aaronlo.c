@@ -5,6 +5,8 @@ int j = 10;
 int i = 1;
 Channel* big;
 
+Value f2();
+
 Value f1() {
     if(j > 0) {
         j--;
@@ -18,6 +20,7 @@ Value f1() {
 Value f2() {
     Channel* ch = go(f1);
     send(ch, asInt(10));
+    send(me(), receive(me()));
     return receive(me());
 }
 
