@@ -155,6 +155,11 @@ Channel *me()
 
 void again()
 {
+    if((*current())->func == 0)
+    {
+	extern int main();
+	exit(main());
+    }
     (*current())->is_started = true;
     (*current())->saved_rsp = (uint64_t)(*current())->stack + STACK_ENTRIES*sizeof(uint64_t)-8;
     addQ(&ready, *current());
