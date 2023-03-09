@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define MISSING() missing(__FILE__, __LINE__)
 
 struct Routine;
 typedef struct Routine Routine;
@@ -70,11 +69,6 @@ static Routine *removeQ(Queue *q)
 static Routine *current_ = 0;
 static Queue ready = {0, 0};
 
-void delete_this_function_when_you_are_done()
-{
-    addQ(&ready, 0);
-    (void)removeQ(&ready);
-}
 
 Routine **current()
 {
@@ -95,17 +89,20 @@ extern void save_rip(Routine *r, uint64_t rsp);
 extern void new_function(Routine *from, uint64_t to, Func func);
 extern void save_rip_early(Routine *r);
 
-void save_rsp(Routine *r)
-{
-    __asm__ volatile("movq %%rsp, %0"
-                     : "=r"(r->saved_rsp));
-}
-
+/**
+ * This method switches from the current routine "from" to the new routine "to"
+ * It assumes that the rip of the to routine is ontop of the stack and will store from rip 
+ * onto the from stack
+*/
 void switch_to(Routine *from, Routine *to)
 {
     save_rip(from, to->saved_rsp);
 }
 
+/**
+ * This switches from this routine "from" to the next routine in the ready q
+ * If there are no more routines in ready, it will exit
+ */
 void switch_from(Routine *from)
 {
     Routine *to = removeQ(&ready);
@@ -116,7 +113,7 @@ void switch_from(Routine *from)
     else
     {
         *current() = to;
-        if (to->is_started)
+        if (to->is_started) //if the stack has not been instantiated yet
         {
             to->is_started = false;
 	    to->saved_rsp = (uint64_t)to->stack + STACK_ENTRIES*sizeof(uint64_t)-8;
@@ -127,19 +124,24 @@ void switch_from(Routine *from)
             switch_to(from, to);
         }
     }
-    // Testing
 }
 
+/**
+ * switches from current to next ready Q
+ */
 void next_ready_function()
 {
     switch_from(*current());
 }
 
+/**
+ * Creates a c-routine
+ */
 Channel *go(Func func)
 {
     Routine *r = malloc(sizeof(Routine));
     r->stack[STACK_ENTRIES-1]=(uint64_t)(&next_ready_function);
-    r->saved_rsp = (uint64_t)r->stack + STACK_ENTRIES*sizeof(uint64_t)-8; // TODO: My ordering may be wrong or somethign
+    r->saved_rsp = (uint64_t)r->stack + STACK_ENTRIES*sizeof(uint64_t)-8;
     r->ch = *channel();
     r->func = func;
     r->is_started = true;
@@ -153,8 +155,12 @@ Channel *me()
     return &(*current())->ch;
 }
 
+/**
+ * Runs the method again
+ */
 void again()
 {
+    //special expection if current is main
     if((*current())->func == 0)
     {
 	extern int main();
@@ -166,6 +172,9 @@ void again()
     next_ready_function();
 }
 
+/**
+ * creates a new channel
+ */
 Channel *channel()
 {
     Channel *ch = malloc(sizeof(Channel));

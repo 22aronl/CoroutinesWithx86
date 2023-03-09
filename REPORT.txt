@@ -1,8 +1,12 @@
 - Is there a reliable way of freeing the memory associated with c-routine?
   explain how you did it
 
+Yes, while the memory of the c-routine can't be freed while the routine is running, after the routine returns, all that needs to be stored is its return value. That value can perhaps be store in another stack and thus allowing the routine to be freed.
+
 - Is there a reliable way of freeing the memory associated with a channel?
   explain how you did it
+
+There isn't much of away to reliably free the memory associated with the channel. Because the channel can be accessed by a pointer, it can be access anywhere anytime and its impossible to tell when it will be access next. However, once a c-routine returns onto the channel, everything other than that value no longer needs to be stored.
 
 - Read about the following programming abstractions and explain how they
   relate to the current assignment:
