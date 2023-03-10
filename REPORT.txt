@@ -12,11 +12,31 @@ There isn't much of away to reliably free the memory associated with the channel
   relate to the current assignment:
 
        * Continuations
+         * Continuations are constructs that allow for the program's execution state to be stored and returned to at a later point in time.
+           In this assignment, we store the rip and callee saved registers to be able to return to the method stack (https://en.wikipedia.org/wiki/Continuation)
+        
        * Closures
+         * A closure is a function that can access variables from the scope in which it was defined.
+           In this assignment, we use "closures" to store the state of the c-routine and the channel. (https://stackoverflow.com/questions/36636/what-is-a-closure)
        * Threads
+         * A thread is a sequence of instructions that can be executed independently of other code.
+           In this assignment, we use threads to run the c-routines and channels. (https://en.wikipedia.org/wiki/Thread_(computing))
        * Co-routines
+         * Coroutines are like threads however must be scheduled and explictily yield control to other coroutines.
+           In this assignment, we use coroutines to run the c-routines and channels. (https://en.wikipedia.org/wiki/Coroutine)
        * Green threads
+         * Green threads are threads but scheduled by the runtime environment and not the os. this allows threads to switch faster
+          but are unable to take advantage of multiple processors. (https://en.wikipedia.org/wiki/Green_thread)
        * Fibers
+         * Fibers are like threads with cooperative multitasking but ar ealso scheduled by the runtime environment.
+          Our implementation of c-routines and channels are very similar to fibers, (https://en.wikipedia.org/wiki/Fiber_(computer_science))
        * non-local goto
+         * These are goto statements but can jump to any point in a program, jumping out of functions or try blocks. 
+          In C or C++, setjmp and longjmp can be used to implement non-local goto. However, these oftern lack stack management and skip certain control flow
+          unlike our c-routines. (https://en.wikipedia.org/wiki/Non-local_goto)
        * Python async/await
+         * This is a way to write asynchronous code in python. I think it is most like our project, other than the channel sending. Each function of 
+          async will run on its own, only switching to another async mehtod when it yields with await. (https://docs.python.org/3/library/asyncio-task.html)
        * C++20 coroutines
+         * C++20 introduces support for coroutines, which are very similar to our project. They are able to suspend and resume execution at any point in the function.
+          (https://en.cppreference.com/w/cpp/language/coroutines)

@@ -1,4 +1,4 @@
-CFLAGS = -Werror -Wall -O0 -g -std=c11
+CFLAGS = -Werror -Wall -O3 -g -std=c11
 
 LIB_C_FILES=${wildcard src/*.c}
 LIB_S_FILES=${wildcard src/*.s}
